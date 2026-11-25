@@ -13,7 +13,7 @@ import {
   seedInsuranceIx,
   sendIxs,
   PROGRAM_ID,
-} from "../lib/program.ts";
+} from "../lib/program";
 
 const RPC = process.env.RPC_URL ?? "https://api.devnet.solana.com";
 const SOL_FEED = "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";

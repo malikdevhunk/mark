@@ -16,7 +16,7 @@ import {
   PROGRAM_ID,
   sendIxs,
   solscan,
-} from "../lib/program.ts";
+} from "../lib/program";
 
 const RPC = process.env.RPC_URL ?? "https://api.devnet.solana.com";
 
@@ -51,7 +51,7 @@ async function main() {
   };
   const amount = 20_000_000n;
   const user = await connection.getAccountInfo(
-    (await import("../lib/program.ts")).userPda(trader.publicKey),
+    (await import("../lib/program")).userPda(trader.publicKey),
   );
   const setup = [];
   if (!user) setup.push(initUserIx(trader.publicKey));
