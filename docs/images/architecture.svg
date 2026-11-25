@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 420" font-family="IBM Plex Sans, sans-serif">
+  <rect width="920" height="420" fill="#0e0e0c"/>
+  <g fill="none" stroke="#2a2a26" stroke-width="1">
+    <rect x="40" y="40" width="200" height="88" rx="6"/>
+    <rect x="360" y="36" width="220" height="120" rx="6"/>
+    <rect x="680" y="40" width="200" height="88" rx="6"/>
+    <rect x="40" y="200" width="200" height="150" rx="6"/>
+    <rect x="300" y="200" width="320" height="150" rx="6"/>
+    <rect x="680" y="200" width="200" height="150" rx="6"/>
+  </g>
+  <g fill="#eceae4" font-size="14">
+    <text x="140" y="72" text-anchor="middle">Trader</text>
+    <text x="140" y="96" text-anchor="middle" fill="#9a968c" font-size="12">deposit, open, close</text>
+    <text x="470" y="68" text-anchor="middle">mark_perp</text>
+    <text x="470" y="92" text-anchor="middle" fill="#9a968c" font-size="12">exchange, market, position</text>
+    <text x="470" y="116" text-anchor="middle" fill="#9a968c" font-size="12">bounded margin, funding</text>
+    <text x="780" y="72" text-anchor="middle">Pyth</text>
+    <text x="780" y="96" text-anchor="middle" fill="#9a968c" font-size="12">spot, then the model</text>
+    <text x="140" y="232" text-anchor="middle">Vault</text>
+    <text x="140" y="256" text-anchor="middle" fill="#9a968c" font-size="12">trader collateral</text>
+    <text x="140" y="280" text-anchor="middle">Insurance</text>
+    <text x="140" y="304" text-anchor="middle" fill="#9a968c" font-size="12">the other side of PnL</text>
+    <text x="460" y="232" text-anchor="middle">Keeper</text>
+    <text x="460" y="256" text-anchor="middle" fill="#9a968c" font-size="12">funding crank, anyone</text>
+    <text x="460" y="280" text-anchor="middle">Liquidator</text>
+    <text x="460" y="304" text-anchor="middle" fill="#9a968c" font-size="12">equity under maintenance</text>
+    <text x="780" y="232" text-anchor="middle">Desk</text>
+    <text x="780" y="256" text-anchor="middle" fill="#9a968c" font-size="12">safe band, three sentences</text>
+    <text x="780" y="280" text-anchor="middle" fill="#9a968c" font-size="12">tape of the oracle</text>
+  </g>
+  <g stroke="#d7c4a3" stroke-width="1" fill="none">
+    <path d="M240 84 H360"/>
+    <path d="M580 84 H680"/>
+    <path d="M140 168 V200"/>
+    <path d="M470 156 V200"/>
+    <path d="M780 128 V200"/>
+  </g>
+</svg>

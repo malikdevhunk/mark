@@ -1,0 +1,19 @@
+[package]
+name = "mark-sim"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "LiteSVM checks for the Mark program"
+
+[workspace]
+
+[dependencies]
+litesvm = "=0.18.2"
+sha2 = "0.10"
+solana-address = "=2.7.0"
+solana-clock = "=3.2.1"
+solana-instruction = "=3.5.1"
+solana-keypair = "=3.1.2"
+solana-message = "=4.6.0"
+solana-signer = "=3.0.1"
+solana-transaction = "=4.3.0"

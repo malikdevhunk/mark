@@ -1,0 +1,22 @@
+target/
+.anchor/
+node_modules/
+test-ledger/
+.yarn/
+.surfpool/
+**/*.rs.bk
+.DS_Store
+
+# Keys never go in the tree.
+keys/
+.env
+.env.*
+!.env.example
+
+app/.next/
+app/out/
+app/tsconfig.tsbuildinfo
+sim/target/
+app/node_modules/
+coverage/
+*.log

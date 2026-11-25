@@ -1,0 +1,14 @@
+Mark
+Copyright (c) 2026 Saddam Malik
+
+This project uses the following third-party software. They are dependencies,
+not authors of Mark.
+
+- Anchor (https://github.com/otter-sec/anchor) — Apache-2.0
+- Solana / Agave client libraries (https://github.com/anza-xyz/agave) — Apache-2.0
+- SPL Token (https://github.com/solana-program/token) — Apache-2.0
+- Pyth Solana Receiver SDK (https://github.com/pyth-network/pyth-crosschain) — Apache-2.0
+- LiteSVM (https://github.com/LiteSVM/litesvm) — Apache-2.0
+- @solana/web3.js and wallet-adapter (https://github.com/anza-xyz/wallet-adapter) — Apache-2.0
+- Next.js (https://github.com/vercel/next.js) — MIT
+- IBM Plex, via Fontsource (https://github.com/IBM/plex) — SIL Open Font License 1.1
