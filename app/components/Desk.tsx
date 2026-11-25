@@ -5,7 +5,11 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Rail } from "./Rail";
+import { Logo } from "./Logo";
+import { OddsDial } from "./OddsDial";
+import { OddsTicker } from "./OddsTicker";
 import { Term } from "./Term";
 import { DemoWalletName } from "./DemoWallet";
 import {
@@ -336,13 +340,20 @@ export function Desk() {
               : "Set a risk"
       : null;
 
+  const basisUp = basisCents >= 0;
+  const samplePos = !position || position.size === 0n;
+
   return (
-    <div className="desk">
+    <motion.div className="desk" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: "easeOut" }}>
       <header className="top">
         <div className="brand">
-          <Link href="/">Mark</Link>
+          <Logo />
           <span className="badge">Devnet</span>
+          {example && <span className="badge demo">Demo data</span>}
         </div>
+        <nav className="nav-links">
+          <Link href="/docs">How it works</Link>
+        </nav>
         <p className="lede">{note}</p>
         <div className="top-actions">
           <button type="button" className="ghost" onClick={() => void onFaucet()} disabled={!!busy}>
@@ -366,36 +377,86 @@ export function Desk() {
                   void connect().catch(() => setNote("The demo wallet is ready. Press it again if the first click only selected it."));
                 }}
               >
-                Try with a demo wallet
+                Try a demo wallet
               </button>
             </>
           )}
         </div>
       </header>
 
+      <section className="banner" aria-label="How Mark works">
+        <p>
+          <strong>Mark is a perpetual on event odds.</strong> The price is a probability between 0 and 1.
+        </p>
+        <ol>
+          <li>You buy (long) or sell (short) those odds, in contracts of one dollar per full move from 0 to 1.</li>
+          <li>Margin is the greater of a small floor and half the worst loss to the bound, so a 90¢ long posts more than a 50¢ long.</li>
+          <li>Funding, once an hour, pulls the traded price back to a published index.</li>
+        </ol>
+      </section>
+
       <div className="grid">
         <aside className="markets">
-          {(markets.length ? markets : [EXAMPLE]).map((m, i) => (
-            <button
-              key={m.symbol + i}
-              type="button"
-              className={i === selected || (!live && i === 0) ? "market on" : "market"}
-              onClick={() => setSelected(i)}
-            >
-              <span>{m.symbol || "MARKET"}</span>
-              <strong className="num">{cents(m.mark)}</strong>
-              <em>{example ? "example" : m.status === 1 ? "paused" : "funding 1h"}</em>
-            </button>
-          ))}
-          <p className="fine">
-            <Link href="/docs">What this is</Link>
-          </p>
+          <div className="markets-head">
+            <span>Markets</span>
+            <span>Last</span>
+          </div>
+          {(markets.length ? markets : [EXAMPLE]).map((m, i) => {
+            const delta = Number(m.mark - m.index) / 10_000;
+            return (
+              <button
+                key={m.symbol + i}
+                type="button"
+                className={i === selected || (!live && i === 0) ? "market on" : "market"}
+                onClick={() => setSelected(i)}
+              >
+                <span className="sym">{m.symbol || "MARKET"}</span>
+                <strong className="num">{cents(m.mark)}</strong>
+                <em>
+                  {example ? "demo series" : m.status === 1 ? "paused" : "funding 1h"}
+                  <span className={delta >= 0 ? "delta up" : "delta down"}>
+                    {" "}
+                    {delta >= 0 ? "+" : ""}
+                    {delta.toFixed(1)}¢
+                  </span>
+                </em>
+              </button>
+            );
+          })}
+          {example && <p className="coming">Live markets replace this row once the program is on devnet.</p>}
         </aside>
 
         <section className="stage">
-          <h1>{market.question}</h1>
-          <p className="resolution">{market.resolution}</p>
-          {example && <p className="example-flag">Example. Not a live print.</p>}
+          <div className="stage-head">
+            <div className="stage-copy">
+              <h1>{market.question}</h1>
+              <p className="resolution">{market.resolution}</p>
+            </div>
+            <div className="price-block">
+              <OddsDial mark={mark} index={market.index} />
+              <div className="price-copy">
+                <OddsTicker micro={mark} className="last odds-ticker" />
+                <div className={basisUp ? "vs up" : "vs down"}>
+                  {basisUp ? "+" : ""}
+                  {basisCents.toFixed(1)}¢ vs index {cents(market.index)}
+                </div>
+              </div>
+            </div>
+          </div>
+          {example && <p className="example-flag">Demo market. These numbers are sample data, not a live print.</p>}
+          <p className="meta-row">
+            <span>
+              Funding <b>{Math.abs(basisCents).toFixed(1)}¢ {basisUp ? "rich" : "cheap"}</b>
+            </span>
+            {!example && (
+              <span>
+                Next tick <b>{Math.floor(nextIn / 60)}m {nextIn % 60}s</b>
+              </span>
+            )}
+            <span>
+              Open interest <b>{contracts(market.oiLong)} long / {contracts(market.oiShort)} short</b>
+            </span>
+          </p>
           <Rail
             index={market.index}
             mark={mark}
@@ -409,12 +470,16 @@ export function Desk() {
         </section>
 
         <section className="ticket">
+          <p className="ticket-title">
+            <span>Place a trade</span>
+            <span>{example ? "Preview only" : "Isolated margin"}</span>
+          </p>
           <div className="sides">
             <button type="button" className={side === "buy" ? "buy on" : "buy"} onClick={() => setSide("buy")}>
-              Buy
+              Buy / long
             </button>
             <button type="button" className={side === "sell" ? "sell on" : "sell"} onClick={() => setSide("sell")}>
-              Sell
+              Sell / short
             </button>
           </div>
           <label>
@@ -463,23 +528,54 @@ export function Desk() {
         <div className="tabs">
           {(["position", "funding", "tape"] as const).map((name) => (
             <button key={name} type="button" className={tab === name ? "on" : ""} onClick={() => setTab(name)}>
-              {name === "position" ? "Position" : name === "funding" ? "Funding" : "Tape"}
+              {name === "position" ? "Positions" : name === "funding" ? "Funding" : "Oracle tape"}
             </button>
           ))}
         </div>
         {tab === "position" && (
           <div className="sheet">
-            {position && position.size !== 0n ? (
-              <p>
-                {position.size > 0n ? "Long" : "Short"} {contracts(position.size < 0n ? -position.size : position.size)}{" "}
-                from <Term id="Mark">{cents(position.entry)}</Term>. Margin {dollars(position.margin)}.{" "}
-                <button type="button" className="ghost" onClick={() => void onClose()}>
-                  Close
-                </button>
-              </p>
-            ) : (
-              <p className="ghost-row">Long 10 contracts from 51.0¢. Margin $2.55. This is what a position looks like.</p>
-            )}
+            <table>
+              <thead>
+                <tr>
+                  <th>Side</th>
+                  <th>Size</th>
+                  <th>Entry</th>
+                  <th>Mark</th>
+                  <th>Liq</th>
+                  <th>Margin</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {position && position.size !== 0n ? (
+                  <tr>
+                    <td>{position.size > 0n ? "Long" : "Short"}</td>
+                    <td className="num">{contracts(position.size < 0n ? -position.size : position.size)}</td>
+                    <td className="num">{cents(position.entry)}</td>
+                    <td className="num">{cents(mark)}</td>
+                    <td className="num">{quote?.liq != null ? cents(quote.liq) : "—"}</td>
+                    <td className="num">{dollars(position.margin)}</td>
+                    <td>
+                      <button type="button" className="ghost" onClick={() => void onClose()}>
+                        Close
+                      </button>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr>
+                    <td>
+                      Long <span className="sample">Sample</span>
+                    </td>
+                    <td className="num">10.00</td>
+                    <td className="num">51.0¢</td>
+                    <td className="num">50.2¢</td>
+                    <td className="num">34.7¢</td>
+                    <td className="num">$2.55</td>
+                    <td className="ghost-row">Preview</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
             {receipt && (
               <p className="receipt">
                 {receipt.entry} → {receipt.exit}. Funding {receipt.funding}. Net {receipt.net}.{" "}
@@ -521,12 +617,12 @@ export function Desk() {
               </thead>
               <tbody>
                 <tr>
-                  <td>{market.oracleKind === 1 ? "Pyth model" : example ? "example" : "Published reference"}</td>
+                  <td>{market.oracleKind === 1 ? "Pyth model" : example ? "demo feed" : "Published reference"}</td>
                   <td className="num">{cents(market.index)}</td>
                   <td className="num">{market.spot === 0n ? "—" : dollars(market.spot)}</td>
                   <td className="num">{age == null ? "—" : `${age}s`}</td>
                   <td className="num">{market.conf === 0n ? "point" : dollars(market.conf)}</td>
-                  <td>{stale ? "fail" : example ? "example" : "ok"}</td>
+                  <td>{stale ? "fail" : example ? "demo" : "ok"}</td>
                 </tr>
               </tbody>
             </table>
@@ -534,36 +630,60 @@ export function Desk() {
           </div>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }
+
 
 function Chart({ points, example }: { points: Point[]; example: boolean }) {
   if (points.length < 2) return null;
   const w = 100;
-  const h = 36;
+  const h = 42;
   const ys = points.flatMap((p) => [p.mark, p.index]);
   const lo = Math.min(...ys) - 0.02;
   const hi = Math.max(...ys) + 0.02;
+  const yOf = (v: number) => h - ((v - lo) / (hi - lo)) * h;
   const path = (key: "mark" | "index") =>
     points
       .map((p, i) => {
         const x = (i / (points.length - 1)) * w;
-        const y = h - ((p[key] - lo) / (hi - lo)) * h;
-        return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+        return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${yOf(p[key]).toFixed(2)}`;
       })
       .join(" ");
+  const area = `${path("mark")} L${w},${h} L0,${h} Z`;
+  const last = points[points.length - 1];
   return (
     <figure className="chart">
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Mark and index">
+        <defs>
+          <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(243,197,107,0.28)" />
+            <stop offset="100%" stopColor="rgba(243,197,107,0)" />
+          </linearGradient>
+          <filter id="chart-glow" x="-5%" y="-30%" width="110%" height="160%">
+            <feGaussianBlur stdDeviation="0.6" result="b" />
+            <feMerge>
+              <feMergeNode in="b" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {[0.25, 0.5, 0.75].map((t) => (
+          <line key={t} x1="0" x2={w} y1={h * t} y2={h * t} className="grid-line" />
+        ))}
+        <path d={area} className="area-mark" />
         <path d={path("index")} className="line-index" />
         <path d={path("mark")} className="line-mark" />
+        <circle cx={w} cy={yOf(last.mark)} r="0.9" fill="#e4c48a" />
       </svg>
-      <figcaption>
-        <span>mark</span>
-        <span>index</span>
-        <span>probability</span>
-        {example && <span>example</span>}
+      <figcaption className="chart-legend">
+        <span>
+          <i /> mark
+        </span>
+        <span>
+          <i className="index" /> index
+        </span>
+        {example && <span>demo series</span>}
         <span>updated just now</span>
       </figcaption>
     </figure>

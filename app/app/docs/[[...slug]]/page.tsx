@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { notFound } from "next/navigation";
 import { DOCS, findDoc } from "@/lib/docs";
 
@@ -14,6 +15,10 @@ export default async function DocsPage({ params }: { params: Promise<{ slug?: st
   const page = findDoc(key);
   return (
     <article className="docs">
+      <div className="docs-brand">
+        <Logo />
+        <Link href="/">Back to the desk</Link>
+      </div>
       <nav>
         {DOCS.map((item) => (
           <Link key={item.slug || "home"} href={item.slug ? `/docs/${item.slug}` : "/docs"}>
